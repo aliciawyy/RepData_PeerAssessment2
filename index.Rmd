@@ -1,8 +1,8 @@
-Analysis of Storm in the United States
-======================================
+Impact of Different Weather Events on Population Health and Economy in the U.S.
+===============================================================================
 
-## Abstract
-In this report, we will analyze the impact of the storm on *population health* and its *economic consequences* with the data from 1950 till 2011 in the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. To decide which type of event is most harmful to the population health, we will use the estimates of fatalities and injuries, as the histogram shows in the end, **tornado** causes the largest number of fatalities and injuries and also has the greatest economic consequences.
+## Synopsis
+In this report, we will analyze the impact of different weather events on *population health* and its *economic consequences* with the data collected from 1950 till 2011 in the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. To decide which type of event is most harmful to the population health, we will use the estimates of fatalities and injuries, as the histogram shows in the end, **tornado** causes the largest number of fatalities and injuries. For the impact on economy, the estimates of property damage will be used, and the results show that **tornado** also has the greatest economic consequences.
 
 ## Introduction
 
@@ -14,7 +14,8 @@ This project involves exploring the U.S. National Oceanic and Atmospheric Admini
 The full dataset of this study can be downloaded at the address https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2 . First let's load the data and take a look at its structure summary
 
 ```{r cache = TRUE}
-storm <- read.csv("repdata-data-StormData.csv", sep = ",")
+# download.file("http://d396qusza40orc.cloudfront.net/repdata/data/StormData.csv.bz2", "StormData.csv.bz2")
+storm <- read.csv(bzfile("StormData.csv.bz2"), sep = ",")
 str(storm)
 ```
 The events in the database start in the year 1950 and end in November 2011. In the earlier years of the database there are generally fewer events recorded, most likely due to a lack of good records. More recent years should be considered more complete.
@@ -29,7 +30,7 @@ library(gridExtra)
 ### Population Health
 To study which type of storm is most harmful to the population health, we can take a look at the number of fatalities and injuries caused by different types of storm.
 
-As we have in total **`r nrow(storm)`** obsevations, we can first arrange the data and only take the **20** first most serious types of stors. The data processing is as following
+As we have in total **`r nrow(storm)`** obsevations, we will **sort** the data first then only take the **20** first most serious types of weather events to visualize and analyze. The data processing is as following
 
 ```{r cache = TRUE}
 fatalities <- aggregate(x = storm$FATALITIES, by = list(storm$EVTYPE), FUN = sum)
@@ -47,13 +48,37 @@ injuries <- within(injuries, EVTYPE <- factor(x = EVTYPE, levels = injuries$EVTY
 
 ### Economic Consequences
 
-We will use the property damage to estimate the impact of different types of storms on economy.
+We will use the **property damage** and **crop damage** to estimate the impact of different types of weather events on economy. The selection strategy is the same as the previous section. As explained in the section 2.7 of [Storm Data Documentation][https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf], we will need to restore the data from the orginal data file with the information in `PROPDMGEXP` and `CROPDMGEXP`
+* K or k for thousands 
+* M or m for millions
+* B or b for billions
+
+```{r cache = TRUE}
+valid <- c("", "K", "k", "M", "m", "B", "b")
+# If the -EXP is not in the valid set, set the corresponding value to zero
+storm$PROPDMG[!is.element(storm$PROPDMGEXP, valid)] <- 0
+storm$CROPDMG[!is.element(storm$CROPDMGEXP, valid)] <- 0
+
+for(i in 1:3) {
+    coef <- 10*(i*3)
+    storm$PROPDMG[is.element(storm$PROPDMGEXP, valid[i*2:(i*2+1)])] <- storm$PROPDMG[is.element(storm$PROPDMGEXP, valid[i*2:(i*2+1)])]*coef
+    storm$CROPDMG[is.element(storm$CROPDMGEXP, valid[i*2:(i*2+1)])] <- storm$CROPDMG[is.element(storm$CROPDMGEXP, valid[i*2:(i*2+1)])]*coef
+}
+
+
+```
 ```{r cache = TRUE}
 property <- aggregate(x = storm$PROPDMG, by = list(storm$EVTYPE), FUN = sum)
 names(property) <- c("EVTYPE", "PROPDMG")
 property <- arrange(property, PROPDMG, decreasing = TRUE)
 property <- head(property, n = 20)
 property <- within(property, EVTYPE <- factor(x = EVTYPE, levels = property$EVTYPE))
+
+crop <- aggregate(x = storm$CROPDMG, by = list(storm$EVTYPE), FUN = sum)
+names(crop) <- c("EVTYPE", "CROPDMG")
+crop <- arrange(crop, CROPDMG, decreasing = TRUE)
+crop <- head(crop, n = 20)
+crop <- within(crop, EVTYPE <- factor(x = EVTYPE, levels = crop$EVTYPE))
 ```
 
 ## Results
@@ -65,30 +90,37 @@ injuries
 
 ```{r, fig.width = 10}
 plot1 <- qplot(EVTYPE, data = fatalities, weight = FATALITIES, geom = "bar", binwidth = 1) + 
-    scale_y_continuous("FATALITIES") +
+    scale_y_continuous("Number of Fatalities") +
     theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
      xlab("Event Type") + ggtitle("Total Fatalities by Event Type in the U.S.")
 
 plot2 <- qplot(EVTYPE, data = injuries, weight = INJURIES, geom = "bar", binwidth = 1) + 
-    scale_y_continuous("INJURIES") +
+    scale_y_continuous("Number of Injuries") +
     theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
     xlab("Event Type") + ggtitle("Total Injuries by Event Type in the U.S.")
 grid.arrange(plot1, plot2, ncol = 2)
 ```
-According to the histograms above, we note that the **tornado** is the most harmful for the population health as it causes the largest number of fatalities and injuries. In addition, as we note that **excessive heat**, **flash flood**, **heat** and **lightning** also cause much larger number of fatality and injury than the other types of storm, we should also pay attention to these events.
+According to the histograms above, we note that the **tornado** is the most harmful for the population health as it causes the largest number of fatalities and injuries. In addition, as we note that **excessive heat**, **flash flood**, **heat** and **lightning** also cause much larger number of fatality and injury than the other types of weather, we should also pay attention to these events.
 
-The top impact of storms on the propery damage is as following
+The weather events that causes the greatest the propery and crop damage are as following
 ```{r}
 property
+crop
 ```
 
-```{r, fig.width = 8}
-qplot(EVTYPE, data = property, weight = PROPDMG, geom = "bar", binwidth = 1) + 
-    scale_y_continuous("Property Damage") +
+```{r, fig.width = 10}
+plot3 <- qplot(EVTYPE, data = property, weight = PROPDMG, geom = "bar", binwidth = 1) + 
+    scale_y_continuous("Property Damage in US dollars") +
     theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
      xlab("Event Type") + ggtitle("Total Property Damage by Event Type in the U.S.")
+
+plot4 <- qplot(EVTYPE, data = crop, weight = CROPDMG, geom = "bar", binwidth = 1) + 
+    scale_y_continuous("Crop Damage in US dollars") +
+    theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+     xlab("Event Type") + ggtitle("Total Crop Damage by Event Type in the U.S.")
+grid.arrange(plot3, plot4, ncol = 2)
 ```
-As shown in the histogram, **tornado** has the greatest economic impact among all types of storm event.
+As shown in the histogram, **tornado** has the greatest economic impact among all types of weather event, while **flash flood** and **TSTM wind** also have much more serious impact on economy than the other types.
 
 
 
