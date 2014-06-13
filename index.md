@@ -1,15 +1,17 @@
 Analysis of Storm in the United States
 ======================================
 
+## Abstract
+In this report, we will analyze the impact of the storm on *population health* and its *economic consequences* with the data from 1950 till 2011 in the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. To decide which type of event is most harmful to the population health, we will use the estimates of fatalities and injuries, as the histogram shows in the end, **tornado** causes the largest number of fatalities and injuries and also has the greatest economic consequences.
 
-# Introduction
+## Introduction
 
 Storms and other severe weather events can cause both public health and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern.
 
 This project involves exploring the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. This database tracks characteristics of major storms and weather events in the United States, including when and where they occur, as well as estimates of any fatalities, injuries, and property damage.
 
-# Data Processing
-First let's load the data which and take a look at its structure summary
+## Data Processing
+The full dataset of this study can be downloaded at the address https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2 . First let's load the data and take a look at its structure summary
 
 
 ```r
@@ -73,7 +75,7 @@ library(gridExtra)
 ```
 
 
-## Population Health
+### Population Health
 To study which type of storm is most harmful to the population health, we can take a look at the number of fatalities and injuries caused by different types of storm.
 
 As we have in total **902297** obsevations, we can first arrange the data and only take the **20** first most serious types of stors. The data processing is as following
@@ -94,12 +96,20 @@ injuries <- within(injuries, EVTYPE <- factor(x = EVTYPE, levels = injuries$EVTY
 ```
 
 
+### Economic Consequences
+
+We will use the property damage to estimate the impact of different types of storms on economy.
+
+```r
+property <- aggregate(x = storm$PROPDMG, by = list(storm$EVTYPE), FUN = sum)
+names(property) <- c("EVTYPE", "PROPDMG")
+property <- arrange(property, PROPDMG, decreasing = TRUE)
+property <- head(property, n = 20)
+property <- within(property, EVTYPE <- factor(x = EVTYPE, levels = property$EVTYPE))
+```
 
 
-
-## Economic Consequences
-
-# Results
+## Results
 With the data we obtained about concerning the *population health*, now we can take a look at the two lists
 
 ```r
@@ -163,14 +173,59 @@ injuries
 ```r
 plot1 <- qplot(EVTYPE, data = fatalities, weight = FATALITIES, geom = "bar", 
     binwidth = 1) + scale_y_continuous("FATALITIES") + theme(axis.text.x = element_text(angle = 60, 
-    hjust = 1)) + xlab("Event Type")
+    hjust = 1)) + xlab("Event Type") + ggtitle("Total Fatalities by Event Type in the U.S.")
 
 plot2 <- qplot(EVTYPE, data = injuries, weight = INJURIES, geom = "bar", binwidth = 1) + 
     scale_y_continuous("INJURIES") + theme(axis.text.x = element_text(angle = 60, 
-    hjust = 1)) + xlab("Event Type")
+    hjust = 1)) + xlab("Event Type") + ggtitle("Total Injuries by Event Type in the U.S.")
 grid.arrange(plot1, plot2, ncol = 2)
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
 
-According to the histograms above, we note that the **tornado** is the most harmful for the population health as it causes the largest number of fatalities and injuries. In addition, as we note that **Excessive heat**, **Flash Flood**, **Heat** and **Lightning** also cause much larger number of fatality and injury than the other types of storm, we should also pay attention to these events.
+According to the histograms above, we note that the **tornado** is the most harmful for the population health as it causes the largest number of fatalities and injuries. In addition, as we note that **excessive heat**, **flash flood**, **heat** and **lightning** also cause much larger number of fatality and injury than the other types of storm, we should also pay attention to these events.
+
+The top impact of storms on the propery damage is as following
+
+```r
+property
+```
+
+```
+##                  EVTYPE PROPDMG
+## 1               TORNADO 3212258
+## 2           FLASH FLOOD 1420125
+## 3             TSTM WIND 1335966
+## 4                 FLOOD  899938
+## 5     THUNDERSTORM WIND  876844
+## 6                  HAIL  688693
+## 7             LIGHTNING  603352
+## 8    THUNDERSTORM WINDS  446293
+## 9             HIGH WIND  324732
+## 10         WINTER STORM  132721
+## 11           HEAVY SNOW  122252
+## 12             WILDFIRE   84459
+## 13            ICE STORM   66001
+## 14          STRONG WIND   62994
+## 15           HIGH WINDS   55625
+## 16           HEAVY RAIN   50842
+## 17       TROPICAL STORM   48424
+## 18     WILD/FOREST FIRE   39345
+## 19       FLASH FLOODING   28497
+## 20 URBAN/SML STREAM FLD   26052
+```
+
+
+
+```r
+qplot(EVTYPE, data = property, weight = PROPDMG, geom = "bar", binwidth = 1) + 
+    scale_y_continuous("Property Damage") + theme(axis.text.x = element_text(angle = 60, 
+    hjust = 1)) + xlab("Event Type") + ggtitle("Total Property Damage by Event Type in the U.S.")
+```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
+
+As shown in the histogram, **tornado** has the greatest economic impact among all types of storm event.
+
+
+
