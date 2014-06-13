@@ -100,7 +100,7 @@ injuries <- within(injuries, EVTYPE <- factor(x = EVTYPE, levels = injuries$EVTY
 
 ### Economic Consequences
 
-We will use the **property damage** and **crop damage** to estimate the impact of different types of weather events on economy. The selection strategy is the same as the previous section. As explained in the section 2.7 of [Storm Data Documentation][https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf], we will need to restore the data from the orginal data file with the information in `PROPDMGEXP` and `CROPDMGEXP`
+We will use the **property damage** and **crop damage** to estimate the impact of different types of weather events on economy. The selection strategy is the same as the previous section. As explained in the section 2.7 of [Storm Data Documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf), we will need to restore the data from the orginal data file with the information in `PROPDMGEXP` and `CROPDMGEXP`
 * K or k for thousands 
 * M or m for millions
 * B or b for billions
@@ -113,7 +113,7 @@ storm$PROPDMG[!is.element(storm$PROPDMGEXP, valid)] <- 0
 storm$CROPDMG[!is.element(storm$CROPDMGEXP, valid)] <- 0
 
 for (i in 1:3) {
-    coef <- 10 * (i * 3)
+    coef <- 10^(i * 3)
     storm$PROPDMG[is.element(storm$PROPDMGEXP, valid[i * 2:(i * 2 + 1)])] <- storm$PROPDMG[is.element(storm$PROPDMGEXP, 
         valid[i * 2:(i * 2 + 1)])] * coef
     storm$CROPDMG[is.element(storm$CROPDMGEXP, valid[i * 2:(i * 2 + 1)])] <- storm$CROPDMG[is.element(storm$CROPDMGEXP, 
@@ -221,27 +221,27 @@ property
 ```
 
 ```
-##                EVTYPE  PROPDMG
-## 1             TORNADO 60583337
-## 2  THUNDERSTORM WINDS 11303717
-## 3         FLASH FLOOD  4535194
-## 4           LIGHTNING  3048977
-## 5                HAIL  2653140
-## 6               FLOOD  1919461
-## 7          HIGH WINDS  1373385
-## 8          HEAVY SNOW   750036
-## 9      FLASH FLOODING   635425
-## 10        URBAN FLOOD   379950
-## 11  FLOOD/FLASH FLOOD   331443
-## 12  THUNDERSTORM WIND   268080
-## 13          HIGH WIND   237318
-## 14          ICE STORM   221670
-## 15                ICE   211650
-## 16       WINTER STORM   189090
-## 17     URBAN FLOODING   166488
-## 18           FLOODING   154524
-## 19          TSTM WIND   128241
-## 20        RIVER FLOOD   118032
+##                        EVTYPE   PROPDMG
+## 1                WINTER STORM 5.000e+15
+## 2                 RIVER FLOOD 5.000e+15
+## 3              HURRICANE OPAL 3.100e+15
+## 4   HEAVY RAIN/SEVERE WEATHER 2.500e+15
+## 5  TORNADOES, TSTM WIND, HAIL 1.600e+15
+## 6   HURRICANE OPAL/HIGH WINDS 1.000e+14
+## 7                     TORNADO 3.188e+10
+## 8          THUNDERSTORM WINDS 1.345e+09
+## 9                 FLASH FLOOD 8.020e+08
+## 10                      FLOOD 6.718e+08
+## 11                 WILD FIRES 6.241e+08
+## 12                 HIGH WINDS 5.730e+08
+## 13                       HAIL 5.416e+08
+## 14             FLASH FLOODING 2.802e+08
+## 15             HURRICANE ERIN 2.581e+08
+## 16                  ICE STORM 2.020e+08
+## 17                 HEAVY SNOW 1.903e+08
+## 18                  LIGHTNING 1.675e+08
+## 19          FLOOD/FLASH FLOOD 1.563e+08
+## 20                STORM SURGE 1.300e+08
 ```
 
 ```r
@@ -249,27 +249,27 @@ crop
 ```
 
 ```
-##                   EVTYPE CROPDMG
-## 1                   HAIL 2115728
-## 2            FLASH FLOOD  466922
-## 3                  FLOOD  460120
-## 4     THUNDERSTORM WINDS  452955
-## 5                TORNADO  167854
-## 6         FLASH FLOODING  143865
-## 7               FLOODING   97995
-## 8            RIVER FLOOD   76080
-## 9        HIGH WINDS/COLD   60300
-## 10             ICE STORM   58905
-## 11             LIGHTNING   45768
-## 12            HIGH WINDS   38446
-## 13                 FROST   33600
-## 14           URBAN FLOOD   27705
-## 15            HEAVY SNOW   18961
-## 16       DAMAGING FREEZE   18720
-## 17           HEAVY RAINS   18600
-## 18                  HEAT   16758
-## 19          EXTREME COLD   15210
-## 20 DUST STORM/HIGH WINDS   15000
+##                     EVTYPE   CROPDMG
+## 1              RIVER FLOOD 5.000e+15
+## 2                ICE STORM 5.000e+15
+## 3                  DROUGHT 5.000e+14
+## 4                     HEAT 4.000e+14
+## 5                   FREEZE 2.000e+14
+## 6                    FLOOD 6.856e+08
+## 7                     HAIL 4.689e+08
+## 8          DAMAGING FREEZE 2.621e+08
+## 9       THUNDERSTORM WINDS 1.838e+08
+## 10       EXCESSIVE WETNESS 1.420e+08
+## 11          HURRICANE ERIN 1.360e+08
+## 12                 TORNADO 1.242e+08
+## 13        FLOOD/RAIN/WINDS 1.128e+08
+## 14                BLIZZARD 1.050e+08
+## 15             FLASH FLOOD 8.178e+07
+## 16 COLD AND WET CONDITIONS 6.600e+07
+## 17              HEAVY SNOW 6.353e+07
+## 18                   FROST 6.100e+07
+## 19             HEAVY RAINS 6.050e+07
+## 20       FLOOD/FLASH FLOOD 5.510e+07
 ```
 
 
@@ -287,7 +287,7 @@ grid.arrange(plot3, plot4, ncol = 2)
 
 ![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9.png) 
 
-As shown in the histogram, **tornado** has the greatest economic impact among all types of weather event, while **flash flood** and **TSTM wind** also have much more serious impact on economy than the other types.
+As shown in the histogram, **tornado** has the greatest economic impact among all types of weather event, while **flash flood** and **TSTM wind** also have much more serious impact on economy than the other types. 
 
 
 
