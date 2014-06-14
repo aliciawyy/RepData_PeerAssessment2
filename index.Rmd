@@ -2,7 +2,7 @@ Impact of Severe Weather Events on Population Health and Economy in the U.S.
 ===============================================================================
 
 ## Synopsis
-In this report, we will analyze the impact of different weather events on *population health* and its *economic consequences* with the data collected from 1950 till 2011 in the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. To decide which type of event is most harmful to the population health, we will use the estimates of fatalities and injuries, as the histogram shows in the end, **tornado** causes the largest number of fatalities and injuries. For the impact on economy, the estimates of property and crop damage will be used, and the results show that **flood**, **hurricane/typhoon**, **storm surge**, **river flood** and **ice storm** have the greatest economic consequences.
+In this report, we will analyze the impact of different weather events on *population health* and its *economic consequences* with the data collected from 1950 till 2011 in the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. To decide which type of event is most harmful to the population health, we will use the estimates of fatalities and injuries, as the histogram shows in the end, **tornado** causes the largest number of fatalities and injuries. For the impact on economy, the estimates of property and crop damage will be used, and the results show that **flood** and **drought** have the greatest economic consequences.
 
 ## Introduction
 
@@ -48,7 +48,7 @@ injuries <- within(injuries, EVTYPE <- factor(x = EVTYPE, levels = injuries$EVTY
 
 ### Economic Consequences
 
-We will use the **property damage** and **crop damage** to estimate the impact of different types of weather events on economy. The selection strategy is the same as the previous section. As explained in the section 2.7 of [Storm Data Documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf), we will need to restore the data from the orginal data file with the information in `PROPDMGEXP` and `CROPDMGEXP` and we will clean the data with other symboles in the same section.
+We will use the **property damage** and **crop damage** to estimate the impact of different types of weather events on economy. As explained in the section 2.7 of [Storm Data Documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf), we will need to restore the data from the orginal data file with the information in `PROPDMGEXP` and `CROPDMGEXP` and we will keep the data with other symboles without scaling.
 * K or k for thousands 
 * M or m for millions
 * B or b for billions
@@ -56,17 +56,13 @@ We will use the **property damage** and **crop damage** to estimate the impact o
 ```{r}
 valid <- c("", "K", "k", "M", "m", "B", "b")
 
-# If the -EXP is not in the valid set, set the corresponding value to zero
-storm$PROPDMG[!is.element(storm$PROPDMGEXP, valid)] <- 0
-storm$CROPDMG[!is.element(storm$CROPDMGEXP, valid)] <- 0
-
 for(i in 1:3) {
     coef <- 10^(i*3)
-    storm$PROPDMG[is.element(storm$PROPDMGEXP, valid[i*2:(i*2+1)])] <- storm$PROPDMG[is.element(storm$PROPDMGEXP, valid[i*2:(i*2+1)])]*coef
-    storm$CROPDMG[is.element(storm$CROPDMGEXP, valid[i*2:(i*2+1)])] <- storm$CROPDMG[is.element(storm$CROPDMGEXP, valid[i*2:(i*2+1)])]*coef
+    storm$PROPDMG[is.element(storm$PROPDMGEXP, valid[(i*2):(i*2+1)])] <- storm$PROPDMG[is.element(storm$PROPDMGEXP, valid[(i*2):(i*2+1)])]*coef
+    storm$CROPDMG[is.element(storm$CROPDMGEXP, valid[(i*2):(i*2+1)])] <- storm$CROPDMG[is.element(storm$CROPDMGEXP, valid[(i*2):(i*2+1)])]*coef
 }
 ```
-
+The selection strategy is the same as the previous section.
 ```{r}
 property <- aggregate(x = storm$PROPDMG, by = list(storm$EVTYPE), FUN = sum)
 names(property) <- c("EVTYPE", "PROPDMG")
@@ -120,7 +116,7 @@ plot4 <- qplot(EVTYPE, data = crop, weight = CROPDMG, geom = "bar", binwidth = 1
     ggtitle("Total Crop Damage by Event Type in the U.S.")
 grid.arrange(plot3, plot4, ncol = 2)
 ```
-As shown in the histogram, **flood**, **hurricane/typhoon** and **storm surge** have the greatest property damage among all types of weather event, and **river flood** and **ice storm** have the most serious impact on crop damage. Overall, **flood**, **hurricane/typhoon**, **storm surge**, **river flood** and **ice storm** have the greatest economic consequences. 
+As shown in the histogram, **flood** has the greatest property damage among all types of weather event, and **drought** has the most serious impact on crop damage. Overall, **flood** and **drought** have the greatest economic consequences. 
 
 
 

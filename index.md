@@ -2,7 +2,7 @@ Impact of Severe Weather Events on Population Health and Economy in the U.S.
 ===============================================================================
 
 ## Synopsis
-In this report, we will analyze the impact of different weather events on *population health* and its *economic consequences* with the data collected from 1950 till 2011 in the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. To decide which type of event is most harmful to the population health, we will use the estimates of fatalities and injuries, as the histogram shows in the end, **tornado** causes the largest number of fatalities and injuries. For the impact on economy, the estimates of property and crop damage will be used, and the results show that **flood**, **hurricane/typhoon**, **storm surge**, **river flood** and **ice storm** have the greatest economic consequences.
+In this report, we will analyze the impact of different weather events on *population health* and its *economic consequences* with the data collected from 1950 till 2011 in the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. To decide which type of event is most harmful to the population health, we will use the estimates of fatalities and injuries, as the histogram shows in the end, **tornado** causes the largest number of fatalities and injuries. For the impact on economy, the estimates of property and crop damage will be used, and the results show that **flood** and **drought** have the greatest economic consequences.
 
 ## Introduction
 
@@ -100,7 +100,7 @@ injuries <- within(injuries, EVTYPE <- factor(x = EVTYPE, levels = injuries$EVTY
 
 ### Economic Consequences
 
-We will use the **property damage** and **crop damage** to estimate the impact of different types of weather events on economy. The selection strategy is the same as the previous section. As explained in the section 2.7 of [Storm Data Documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf), we will need to restore the data from the orginal data file with the information in `PROPDMGEXP` and `CROPDMGEXP` and we will clean the data with other symboles in the same section.
+We will use the **property damage** and **crop damage** to estimate the impact of different types of weather events on economy. As explained in the section 2.7 of [Storm Data Documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf), we will need to restore the data from the orginal data file with the information in `PROPDMGEXP` and `CROPDMGEXP` and we will keep the data with other symboles without scaling.
 * K or k for thousands 
 * M or m for millions
 * B or b for billions
@@ -109,20 +109,16 @@ We will use the **property damage** and **crop damage** to estimate the impact o
 ```r
 valid <- c("", "K", "k", "M", "m", "B", "b")
 
-# If the -EXP is not in the valid set, set the corresponding value to zero
-storm$PROPDMG[!is.element(storm$PROPDMGEXP, valid)] <- 0
-storm$CROPDMG[!is.element(storm$CROPDMGEXP, valid)] <- 0
-
 for (i in 1:3) {
     coef <- 10^(i * 3)
-    storm$PROPDMG[is.element(storm$PROPDMGEXP, valid[i * 2:(i * 2 + 1)])] <- storm$PROPDMG[is.element(storm$PROPDMGEXP, 
-        valid[i * 2:(i * 2 + 1)])] * coef
-    storm$CROPDMG[is.element(storm$CROPDMGEXP, valid[i * 2:(i * 2 + 1)])] <- storm$CROPDMG[is.element(storm$CROPDMGEXP, 
-        valid[i * 2:(i * 2 + 1)])] * coef
+    storm$PROPDMG[is.element(storm$PROPDMGEXP, valid[(i * 2):(i * 2 + 1)])] <- storm$PROPDMG[is.element(storm$PROPDMGEXP, 
+        valid[(i * 2):(i * 2 + 1)])] * coef
+    storm$CROPDMG[is.element(storm$CROPDMGEXP, valid[(i * 2):(i * 2 + 1)])] <- storm$CROPDMG[is.element(storm$CROPDMGEXP, 
+        valid[(i * 2):(i * 2 + 1)])] * coef
 }
 ```
 
-
+The selection strategy is the same as the previous section.
 
 ```r
 property <- aggregate(x = storm$PROPDMG, by = list(storm$EVTYPE), FUN = sum)
@@ -222,27 +218,27 @@ property
 ```
 
 ```
-##                        EVTYPE   PROPDMG
-## 1                       FLOOD 1.225e+17
-## 2           HURRICANE/TYPHOON 6.550e+16
-## 3                 STORM SURGE 4.256e+16
-## 4                   HURRICANE 5.700e+15
-## 5                     TORNADO 5.300e+15
-## 6              TROPICAL STORM 5.150e+15
-## 7                WINTER STORM 5.000e+15
-## 8                 RIVER FLOOD 5.000e+15
-## 9            STORM SURGE/TIDE 4.000e+15
-## 10             HURRICANE OPAL 3.100e+15
-## 11  HEAVY RAIN/SEVERE WEATHER 2.500e+15
-## 12                       HAIL 1.800e+15
-## 13 TORNADOES, TSTM WIND, HAIL 1.600e+15
-## 14           WILD/FOREST FIRE 1.500e+15
-## 15                  HIGH WIND 1.300e+15
-## 16        SEVERE THUNDERSTORM 1.200e+15
-## 17                   WILDFIRE 1.040e+15
-## 18                FLASH FLOOD 1.000e+15
-## 19  HURRICANE OPAL/HIGH WINDS 1.000e+14
-## 20                  TSTM WIND 4.485e+09
+##                       EVTYPE   PROPDMG
+## 1                      FLOOD 1.447e+11
+## 2          HURRICANE/TYPHOON 6.931e+10
+## 3                    TORNADO 5.694e+10
+## 4                STORM SURGE 4.332e+10
+## 5                FLASH FLOOD 1.614e+10
+## 6                       HAIL 1.573e+10
+## 7                  HURRICANE 1.187e+10
+## 8             TROPICAL STORM 7.704e+09
+## 9               WINTER STORM 6.688e+09
+## 10                 HIGH WIND 5.270e+09
+## 11               RIVER FLOOD 5.119e+09
+## 12                  WILDFIRE 4.765e+09
+## 13          STORM SURGE/TIDE 4.641e+09
+## 14                 TSTM WIND 4.485e+09
+## 15                 ICE STORM 3.945e+09
+## 16         THUNDERSTORM WIND 3.483e+09
+## 17            HURRICANE OPAL 3.173e+09
+## 18          WILD/FOREST FIRE 3.002e+09
+## 19 HEAVY RAIN/SEVERE WEATHER 2.500e+09
+## 20        THUNDERSTORM WINDS 1.736e+09
 ```
 
 ```r
@@ -251,25 +247,25 @@ crop
 
 ```
 ##               EVTYPE   CROPDMG
-## 1        RIVER FLOOD 5.000e+15
-## 2          ICE STORM 5.000e+15
-## 3  HURRICANE/TYPHOON 1.510e+15
-## 4            DROUGHT 1.500e+15
-## 5               HEAT 4.000e+14
-## 6             FREEZE 2.000e+14
-## 7              FLOOD 5.662e+09
-## 8               HAIL 3.026e+09
-## 9          HURRICANE 2.742e+09
-## 10       FLASH FLOOD 1.421e+09
-## 11      EXTREME COLD 1.293e+09
-## 12      FROST/FREEZE 1.094e+09
-## 13        HEAVY RAIN 7.334e+08
-## 14    TROPICAL STORM 6.783e+08
-## 15         HIGH WIND 6.386e+08
-## 16         TSTM WIND 5.540e+08
-## 17    EXCESSIVE HEAT 4.924e+08
-## 18           TORNADO 4.150e+08
-## 19 THUNDERSTORM WIND 4.148e+08
+## 1            DROUGHT 1.397e+10
+## 2              FLOOD 5.662e+09
+## 3        RIVER FLOOD 5.029e+09
+## 4          ICE STORM 5.022e+09
+## 5               HAIL 3.026e+09
+## 6          HURRICANE 2.742e+09
+## 7  HURRICANE/TYPHOON 2.608e+09
+## 8        FLASH FLOOD 1.421e+09
+## 9       EXTREME COLD 1.293e+09
+## 10      FROST/FREEZE 1.094e+09
+## 11        HEAVY RAIN 7.334e+08
+## 12    TROPICAL STORM 6.783e+08
+## 13         HIGH WIND 6.386e+08
+## 14         TSTM WIND 5.540e+08
+## 15    EXCESSIVE HEAT 4.924e+08
+## 16            FREEZE 4.462e+08
+## 17           TORNADO 4.150e+08
+## 18 THUNDERSTORM WIND 4.148e+08
+## 19              HEAT 4.015e+08
 ## 20          WILDFIRE 2.955e+08
 ```
 
@@ -288,7 +284,7 @@ grid.arrange(plot3, plot4, ncol = 2)
 
 ![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9.png) 
 
-As shown in the histogram, **flood**, **hurricane/typhoon** and **storm surge** have the greatest property damage among all types of weather event, and **river flood** and **ice storm** have the most serious impact on crop damage. Overall, **flood**, **hurricane/typhoon**, **storm surge**, **river flood** and **ice storm** have the greatest economic consequences. 
+As shown in the histogram, **flood** has the greatest property damage among all types of weather event, and **drought** has the most serious impact on crop damage. Overall, **flood** and **drought** have the greatest economic consequences. 
 
 
 
